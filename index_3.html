@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Every Birthday Since</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --gold: #d9a45b;
+    --gold-deep: #b5793a;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{ font-family:'Karla', sans-serif; position:relative; overflow-x:hidden; }
+
+  body::before{
+    content:"";
+    position:absolute;
+    top:0; left:0;
+    width:3px;
+    height:100%;
+    background:linear-gradient(
+      to bottom,
+      #0d1321 0%, #16213a 12%, #3a2f45 30%, #55414f 42%,
+      #8a5f52 52%, #caa06a 62%, #f1ddb9 78%, #f6ecdd 100%
+    );
+    z-index:0;
+  }
+
+  section{
+    position:relative; z-index:1;
+    padding:9vh 8vw;
+    min-height:100vh;
+    display:flex; flex-direction:column; justify-content:center; gap:2rem;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.78rem; letter-spacing:0.14em; text-transform:uppercase; opacity:0.75;
+  }
+
+  h1, h2{ font-family:'Fraunces', serif; font-weight:340; line-height:1.08; }
+  h1{ font-size:clamp(2.4rem, 6vw, 4.6rem); font-weight:300; }
+  h2{ font-size:clamp(1.9rem, 4.4vw, 3.1rem); }
+  p{ font-size:1.05rem; line-height:1.65; max-width:36ch; }
+
+  .row{ display:grid; grid-template-columns:1fr; gap:2.5rem; align-items:center; }
+  @media(min-width:820px){
+    .row{ grid-template-columns:1fr 1.15fr; gap:4rem; }
+    .row.reverse .text{ order:2; }
+    .row.reverse .visual{ order:1; }
+  }
+
+  .visual{ display:flex; justify-content:center; }
+
+  /* --- gallery: wraps any number of photos/videos --- */
+  .gallery{
+    display:flex;
+    flex-wrap:wrap;
+    gap:1.2rem;
+    justify-content:center;
+    max-width:820px;
+  }
+
+  .frame{
+    position:relative;
+    width:min(88vw, 420px);
+    aspect-ratio:4/5;
+    overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .frame img, .frame video{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .frame .ph-label{
+    display:none; flex-direction:column; align-items:center; gap:0.4rem;
+    font-family:'IBM Plex Mono', monospace; font-size:0.65rem; letter-spacing:0.04em;
+    text-align:center; padding:0.8rem; opacity:0.65; word-break:break-all;
+  }
+  .frame.placeholder .ph-label{ display:flex; }
+  .frame.placeholder img, .frame.placeholder video{ display:none; }
+
+  .frame-bubble{
+    border-radius:20px 20px 20px 4px;
+    background:linear-gradient(160deg,#1c2740,#111930);
+    box-shadow:0 16px 32px -16px rgba(0,0,0,0.6);
+  }
+  .frame-bubble .ph-label{ color:#cfd6ea; }
+
+  .frame-seen{
+    border-radius:20px 4px 20px 20px;
+    background:linear-gradient(160deg,#4a3b52,#382c40);
+    box-shadow:0 16px 32px -16px rgba(0,0,0,0.6);
+  }
+  .frame-seen .ph-label{ color:#e6dbe4; }
+
+  .frame-polaroid{
+    background:#fbf6ec;
+    padding:12px 12px 34px 12px;
+    border-radius:2px;
+    box-shadow:0 20px 40px -18px rgba(60,40,20,0.45);
+    transform:rotate(-2deg);
+  }
+  .frame-polaroid:nth-child(even){ transform:rotate(2deg); }
+  .frame-polaroid .ph-label{ color:#8a7a63; }
+
+  .frame-polaroid-lg{ width:min(95vw, 640px); }
+
+  .video-badge{
+    position:absolute; top:8px; right:8px;
+    background:rgba(0,0,0,0.55); color:#fff;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.6rem; padding:2px 6px; border-radius:4px;
+    letter-spacing:0.05em; z-index:2; pointer-events:none;
+  }
+
+  /* --- section themes --- */
+  .sec-hero{ background:#0d1321; color:#f3f0ea; text-align:center; align-items:center; }
+  .sec-hero .scrolldown{ font-family:'IBM Plex Mono',monospace; font-size:0.8rem; opacity:0.55; margin-top:1rem; }
+
+  .sec-childhood{ background:#121a2e; color:#e9ecf5; }
+  .sec-2017{ background:#16213a; color:#eef1f8; }
+  .sec-2018{ background:#1a2438; color:#eef1f8; }
+  .sec-2019{ background:#1e2b45; color:#eef1f8; }
+  .sec-2020{ background:#3a2f45; color:#f4eef2; }
+  .sec-2021{ background:#4d3c4a; color:#f6eff2; }
+  .sec-2022{ background:#55414f; color:#f6eff2; }
+  .sec-reveal{ background:linear-gradient(180deg,#7a5548,#8a5f52); color:#fbf1e6; text-align:center; align-items:center; }
+  .sec-2023{ background:#caa06a; color:#3b2a20; }
+  .sec-2024{ background:#f1ddb9; color:#3b2a20; }
+  .sec-2025{ background:#f6ecdd; color:#3b2a20; }
+  .sec-closing{
+    background:
+      linear-gradient(rgba(250,243,230,0.5), rgba(250,243,230,0.5)),
+      url('photos/closing-bg.jpeg') center/cover no-repeat;
+    background-color:#faf3e6;
+    color:#3b2a20; text-align:center; align-items:center;
+  }
+
+  .sec-2023 .eyebrow, .sec-2024 .eyebrow, .sec-2025 .eyebrow, .sec-closing .eyebrow{ color:var(--gold-deep); opacity:1; }
+  .sec-hero .eyebrow, .sec-childhood .eyebrow, .sec-2017 .eyebrow, .sec-2018 .eyebrow, .sec-2019 .eyebrow,
+  .sec-2020 .eyebrow, .sec-2021 .eyebrow, .sec-2022 .eyebrow, .sec-reveal .eyebrow{ color:var(--gold); opacity:1; }
+
+  .chat-meta{ font-family:'IBM Plex Mono',monospace; font-size:0.75rem; opacity:0.6; margin-top:0.6rem; }
+
+  .fade-up{ opacity:0; transform:translateY(28px); transition:opacity 0.9s ease, transform 0.9s ease; }
+  .fade-up.in-view{ opacity:1; transform:translateY(0); }
+  @media (prefers-reduced-motion: reduce){ .fade-up{ opacity:1; transform:none; transition:none; } html{ scroll-behavior:auto; } }
+
+  .closing-note{ font-family:'IBM Plex Mono', monospace; font-size:0.85rem; opacity:0.6; margin-top:1.5rem; }
+</style>
+</head>
+<body>
+
+<section class="sec-hero">
+  <div class="eyebrow fade-up">A timeline, still writing itself</div>
+  <h1 class="fade-up">We sat in the same classroom.<br>We just didn't know it yet.</h1>
+  <p class="fade-up" style="max-width:44ch; margin:0 auto; opacity:0.85;">Every birthday since — from a Facebook message in 2017 to right here.</p>
+  <div class="scrolldown fade-up">scroll ↓</div>
+</section>
+
+<section class="sec-childhood">
+  <div class="row">
+    <div class="text">
+      <div class="eyebrow fade-up">Before any of this</div>
+      <h2 class="fade-up">Two kids who kept crossing paths.</h2>
+      <p class="fade-up">Somewhere in this school, we sat in the same rooms, on the same days — with no idea what either of us would become to the other.</p>
+    </div>
+    <div class="visual fade-up">
+      <div class="gallery" id="gal-childhood"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-2017">
+  <div class="row">
+    <div class="text">
+      <div class="eyebrow fade-up">2017 · first message</div>
+      <h2 class="fade-up">A classmate. Then a notification.</h2>
+      <p class="fade-up">We weren't close back then — barely knew each other. Then Facebook put your name in front of me again, and for some reason, I said hi.</p>
+    </div>
+    <div class="visual fade-up">
+      <div class="gallery" id="gal-2017"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-2018">
+  <div class="row reverse">
+    <div class="text">
+      <div class="eyebrow fade-up">2018 · still talking</div>
+      <h2 class="fade-up">Somehow, it never really stopped.</h2>
+      <p class="fade-up">Conversations that used to end quickly started running long. I didn't have a word for it yet.</p>
+    </div>
+    <div class="visual fade-up">
+      <div class="gallery" id="gal-2018"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-2019">
+  <div class="row">
+    <div class="text">
+      <div class="eyebrow fade-up">2019 · closer</div>
+      <h2 class="fade-up">Daily, not occasional.</h2>
+      <p class="fade-up">By now I looked forward to your name on my screen more than I probably let on.</p>
+    </div>
+    <div class="visual fade-up">
+      <div class="gallery" id="gal-2019"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-2020">
+  <div class="row reverse">
+    <div class="text">
+      <div class="eyebrow fade-up">2020 · the ask</div>
+      <h2 class="fade-up">I said it. You said no.</h2>
+      <p class="fade-up">This was the year I told you how I felt. You turned me down — and neither of us knew yet that it wasn't the end of the story.</p>
+      <div class="chat-meta fade-up">sent · seen · no reply</div>
+    </div>
+    <div class="visual fade-up">
+      <div class="gallery" id="gal-2020"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-2021">
+  <div class="row">
+    <div class="text">
+      <div class="eyebrow fade-up">2021 · just friends</div>
+      <h2 class="fade-up">Patience, disguised as friendship.</h2>
+      <p class="fade-up">We went back to talking like nothing had happened. Except it had — I just kept it to myself a little longer.</p>
+    </div>
+    <div class="visual fade-up">
+      <div class="gallery" id="gal-2021"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-reveal">
+  <div class="eyebrow fade-up">December 2022 · first time, in person</div>
+  <h2 class="fade-up" style="max-width:16ch; margin:0 auto;">At your sister's engagement, you stopped being a name on a screen.</h2>
+  <div class="visual fade-up">
+    <div class="gallery" id="gal-reveal"></div>
+  </div>
+  <p class="fade-up" style="max-width:42ch; margin:0 auto; opacity:0.9;">Years of typing, and then you were just — there. Even better in person than every version I'd imagined.</p>
+</section>
+
+<section class="sec-2023">
+  <div class="row">
+    <div class="text">
+      <div class="eyebrow fade-up">April 2023 · us, officially</div>
+      <h2 class="fade-up">The month "maybe" finally became "yes."</h2>
+      <p class="fade-up">This was the first birthday I got to celebrate as yours, properly. Finally, ours.</p>
+    </div>
+    <div class="visual fade-up">
+      <div class="gallery" id="gal-2023"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-2024">
+  <div class="row reverse">
+    <div class="text">
+      <div class="eyebrow fade-up">2024 · one year in</div>
+      <h2 class="fade-up">Proof that waiting was worth it.</h2>
+      <p class="fade-up">A full year into us, and every birthday since feels like more evidence of the same thing.</p>
+    </div>
+    <div class="visual fade-up">
+      <div class="gallery" id="gal-2024"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-2025">
+  <div class="row">
+    <div class="text">
+      <div class="eyebrow fade-up">2025 · not our best day</div>
+      <h2 class="fade-up">This one didn't go the way I planned.</h2>
+      <p class="fade-up">I wanted this birthday to be something special, and it just didn't come together the way I'd hoped. I'm sorry for that. You deserved better — and you'll get it, starting now.</p>
+    </div>
+    <div class="visual fade-up">
+      <div class="gallery" id="gal-2025"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-closing">
+  <div class="eyebrow fade-up">Still to come</div>
+  <h2 class="fade-up">To every birthday we haven't gotten to yet.</h2>
+  <div class="closing-note fade-up">happy birthday — from the distance that won't be permanent, counting down to forever</div>
+</section>
+
+<script>
+  /* ============================================================
+     ADD YOUR PHOTOS & VIDEOS HERE.
+     Each year has a list of filenames — add as many as you want,
+     in any order. Photos and videos can be mixed freely.
+     Supported video formats: .mp4, .mov, .webm
+     All files should live in the "photos" folder next to this file.
+     ============================================================ */
+  const mediaConfig = {
+    'gal-childhood': { frame: 'frame-bubble',   files: ['childhood-1.jpg'] },
+    'gal-2017':      { frame: 'frame-bubble',   files: ['2017-1.jpg','2017-2.jpg'] },
+    'gal-2018':      { frame: 'frame-bubble',   files: ['2018-1.mp4','2018-2.jpeg','2018-3.jpeg'] },
+    'gal-2019':      { frame: 'frame-bubble',   files: ['2019-1.jpeg','2019-2.jpg','2019-3.mp4'] },
+    'gal-2020':      { frame: 'frame-seen',     files: ['2020-1.mp4','2020-2.jpg','2020-3.jpg'] },
+    'gal-2021':      { frame: 'frame-seen',     files: ['2021-1.jpeg','2021-2.jpeg','2021-3.jpeg'] },
+    'gal-reveal':    { frame: 'frame-polaroid frame-polaroid-lg', files: ['2022-reveal-1.mp4'] },
+    'gal-2023':      { frame: 'frame-polaroid', files: ['2023-1.jpg','2023-2.jpeg','2023-3.mp4'] },
+    'gal-2024':      { frame: 'frame-polaroid', files: ['2024-1.mp4','2024-2.jpeg','2024-3.jpeg'] },
+    'gal-2025':      { frame: 'frame-polaroid', files: ['2025-1.jpg','2025-2.jpeg','2025-3.jpeg'] },
+  };
+
+  const videoExts = ['mp4', 'mov', 'webm', 'm4v'];
+
+  function isVideo(filename){
+    const ext = filename.split('.').pop().toLowerCase();
+    return videoExts.includes(ext);
+  }
+
+  function buildFrame(filename, frameClass){
+    const frame = document.createElement('div');
+    frame.className = `frame ${frameClass}`;
+
+    let mediaEl;
+    if(isVideo(filename)){
+      mediaEl = document.createElement('video');
+      mediaEl.src = `photos/${filename}`;
+      mediaEl.controls = true;
+      mediaEl.muted = true;
+      mediaEl.playsInline = true;
+      mediaEl.addEventListener('error', ()=> frame.classList.add('placeholder'));
+
+      const badge = document.createElement('div');
+      badge.className = 'video-badge';
+      badge.textContent = '▶ video';
+      frame.appendChild(badge);
+    } else {
+      mediaEl = document.createElement('img');
+      mediaEl.src = `photos/${filename}`;
+      mediaEl.alt = filename;
+      mediaEl.onerror = ()=> frame.classList.add('placeholder');
+    }
+
+    frame.appendChild(mediaEl);
+
+    const label = document.createElement('div');
+    label.className = 'ph-label';
+    label.innerHTML = `📷 add file<br>photos/${filename}`;
+    frame.appendChild(label);
+
+    return frame;
+  }
+
+  Object.entries(mediaConfig).forEach(([galleryId, cfg])=>{
+    const gallery = document.getElementById(galleryId);
+    if(!gallery) return;
+    cfg.files.forEach(filename=>{
+      gallery.appendChild(buildFrame(filename, cfg.frame));
+    });
+  });
+
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting) e.target.classList.add('in-view');
+    });
+  }, { threshold:0.18 });
+
+  document.querySelectorAll('.fade-up').forEach(el=>observer.observe(el));
+</script>
+
+</body>
+</html>
